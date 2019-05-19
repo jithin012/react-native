@@ -1,15 +1,12 @@
 import React, { Component } from 'react';
 import { TextInput, StyleSheet, Text, TouchableWithoutFeedback, View, Button, FlatList } from 'react-native';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { updateConnector } from '../../redux/actions';
 
-const Products = {
-	Curtains: 0,
-	Dimmer: 0,
-	Fan: 0,
-	Light: 0
-};
-export default class SwitchBoard extends Component {
+class SwitchBoard extends Component {
 	static navigationOptions = {
-		title: 'Switch Board 1',
+		title: 'Connector',
 		headerStyle: {
 			backgroundColor: '#7b9dfe'
 		},
@@ -21,10 +18,31 @@ export default class SwitchBoard extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			switchBoardName: ''
+			connectors: this.props.connector,
+			selectedConnectorIndex: 0,
+			selectedConnector: this.props.connector[0]
 		};
 	}
+	handleUpdateAndContinue = () => {
+		let { connectors } = this.state;
+		let index = this.state.selectedConnectorIndex;
+		connectors.splice(index, 1, this.state.selectedConnector);
+		this.props.updateConnector(this.props.selectedRoomId, connectors);
+		if (index === connectors.length - 1) {
+			this.props.navigation.navigate('RoomExplore');
+		} else {
+			index++;
+			this.setState({
+				selectedConnectorIndex: index,
+				selectedConnector: connectors[index]
+			});
+		}
+	};
 	render() {
+		const btnTitle =
+			this.state.selectedConnectorIndex === this.state.connectors.length - 1
+				? 'Update & Go Back'
+				: 'Update & Continue';
 		return (
 			<View style={style.container}>
 				<View style={{ flexDirection: 'column' }}>
@@ -38,28 +56,28 @@ export default class SwitchBoard extends Component {
 							backgroundColor: 'gray'
 						}}
 						placeholder='Enter Switch board name'
-						onChangeText={switchBoardName => this.setState({ switchBoardName })}
-						value={this.state.switchBoardName}
+						onChangeText={name => {
+							let { selectedConnector } = this.state;
+							selectedConnector.connectorTitle = name;
+							this.setState({ selectedConnector });
+						}}
+						value={this.state.selectedConnector.connectorTitle}
 					/>
 				</View>
 				<View style={{ flexDirection: 'column' }}>{this.renderProducts()}</View>
-				<Button
-					onPress={() => {
-						console.log('34567');
-					}}
-					title='Update & Continue'
-					color='#841584'
-				/>
+				<Button onPress={this.handleUpdateAndContinue} title={btnTitle} color='#841584' />
 			</View>
 		);
 	}
 	renderProducts = () => {
+		const switchBoard = this.state.selectedConnector;
 		let arr = [];
-		for (let key in Products) {
+		for (let key in switchBoard.products) {
 			arr.push(
 				<View style={style.products} key={key}>
 					<Text style={style.itemLabel}>{key}</Text>
 					<TextInput
+						keyboardType={'numeric'}
 						placeholderTextColor={'#fff'}
 						style={{
 							height: 40,
@@ -70,8 +88,12 @@ export default class SwitchBoard extends Component {
 							width: 200
 						}}
 						placeholder={`Enter number of ${key}.`}
-						onChangeText={updateValue => console.log(key, updateValue)}
-						value={this.state.switchBoardName}
+						onChangeText={updatedValue => {
+							let { selectedConnector } = this.state;
+							selectedConnector.products[key] = updatedValue;
+							this.setState({ selectedConnector });
+						}}
+						value={switchBoard.products[key]}
 					/>
 				</View>
 			);
@@ -79,6 +101,25 @@ export default class SwitchBoard extends Component {
 		return arr;
 	};
 }
+
+function mapStateToProps(state) {
+	return {
+		selectedRoomId: state.room.selectedRoomId,
+		connector: state.room.data[state.room.selectedRoomId].connector
+	};
+}
+const mapDispatchToProps = dispatch => {
+	return bindActionCreators(
+		{
+			updateConnector
+		},
+		dispatch
+	);
+};
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(SwitchBoard);
 
 const style = StyleSheet.create({
 	container: {

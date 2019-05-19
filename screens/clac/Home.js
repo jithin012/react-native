@@ -1,12 +1,20 @@
 import React, { Component } from 'react';
 import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
 
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { updateProductColor } from '../../redux/actions';
+
 // TODO: Use 'TouchableNativeFeedback' instead of 'TouchableOpacity'
-export default class Home extends Component {
+class Home extends Component {
+	constructor(props) {
+		super(props);
+	}
 	static navigationOptions = {
 		header: null
 	};
 	gotoRoomSelector = () => {
+		this.props.updateProductColor('green');
 		this.props.navigation.navigate('RoomSelector');
 	};
 	render() {
@@ -81,3 +89,19 @@ const style = StyleSheet.create({
 		color: '#fff'
 	}
 });
+
+function mapStateToProps(state) {
+	return {};
+}
+const mapDispatchToProps = dispatch => {
+	return bindActionCreators(
+		{
+			updateProductColor
+		},
+		dispatch
+	);
+};
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(Home);

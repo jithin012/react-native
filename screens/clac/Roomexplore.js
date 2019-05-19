@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import { FlatList, Platform, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View, Alert } from 'react-native';
-import fetchData from './RoomHandler';
-
-const DEFAULT_ROOM_ = 4;
-
-export default class RoomExplore extends Component {
+import { FlatList, Button, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View, Alert } from 'react-native';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { updateSelectedRoomid } from '../../redux/actions';
+class RoomExplore extends Component {
 	static navigationOptions = {
 		title: 'Room Explore',
 		headerStyle: {
@@ -18,36 +17,35 @@ export default class RoomExplore extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			room: DEFAULT_ROOM_,
-			roomData: [],
-			selectedRoom: null
+			roomData: this.props.roomData
 		};
 	}
 	onSelctRoom = item => {
-		this.setState({ selectedRoom: item });
+		this.props.updateSelectedRoomid(item.roomId);
 		this.props.navigation.navigate('UpdateRoom');
 	};
-	componentWillMount() {
-		this.setState({ roomData: fetchData(this.state.room) });
-	}
 	/**
 	 * @todo - list comming to center
 	 */
 	render() {
-		console.log('Room data ', this.state.roomData);
 		return (
 			<View style={style.container}>
-				<View style={{ justifyContent: 'center', alignItems: 'center' }}>
+				{/* style={{ justifyContent: 'center', alignItems: 'center' }} */}
+				<View style={{ paddingTop: 20 }}>
 					<FlatList
-						data={this.state.roomData}
+						data={Object.values(this.state.roomData)}
 						keyExtractor={(item, index) => `Room${index}`}
 						renderItem={this.renderRoom}
 						numColumns={2}
 					/>
 				</View>
+				<Button onPress={this.showResults} title={'Show Result'} color='#841584' />
 			</View>
 		);
 	}
+	showResults = () => {
+		this.props.navigation.navigate('Result');
+	};
 	renderRoom = ({ item }) => (
 		<TouchableWithoutFeedback onPress={() => this.onSelctRoom(item)} onLongPress={() => Alert.alert(item.roomId)}>
 			<View style={style.box}>
@@ -63,8 +61,9 @@ const style = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: '#7b9dfe',
-		alignItems: 'center',
-		justifyContent: 'center'
+		marginBottom: 50
+		// alignItems: 'center',
+		// justifyContent: 'center'
 		// paddingTop: 20
 	},
 	box: {
@@ -84,3 +83,21 @@ const style = StyleSheet.create({
 		alignItems: 'stretch'
 	}
 });
+
+function mapStateToProps(state) {
+	return {
+		roomData: state.room.data
+	};
+}
+const mapDispatchToProps = dispatch => {
+	return bindActionCreators(
+		{
+			updateSelectedRoomid
+		},
+		dispatch
+	);
+};
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(RoomExplore);

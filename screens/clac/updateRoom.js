@@ -1,36 +1,26 @@
 import React, { Component } from 'react';
 import { TextInput, StyleSheet, Text, TouchableWithoutFeedback, View, Alert, FlatList } from 'react-native';
-import ActionButton from 'react-native-action-button';
-import Icon from 'react-native-vector-icons/Ionicons';
-const RoomObj = {
-	connector: [
-		{
-			connectorTitle: 'SwitchBoard 1',
-			connectorId: '1002',
-			products: {
-				Curtains: 0,
-				Dimmer: 0,
-				Fan: 0,
-				Light: 0
-			}
-		},
-		{
-			connectorTitle: 'SwitchBoard 2',
-			connectorId: '1003',
-			products: {
-				Curtains: 0,
-				Dimmer: 0,
-				Fan: 0,
-				Light: 0
-			}
-		}
-	],
-	roomId: '1001',
-	roomTitle: 'Room 1'
-};
-export default class UpdateRoom extends Component {
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { updateRoomName } from '../../redux/actions';
+
+class Count extends Component {
+	constructor(props) {
+		super(props);
+	}
+	render() {
+		return <Text>{this.props.roomName}</Text>;
+	}
+}
+
+let RoomTitle = connect(
+	state => ({ roomName: state.room.data[state.room.selectedRoomId]['roomTitle'] }),
+	null
+)(Count);
+
+class UpdateRoom extends Component {
 	static navigationOptions = {
-		title: RoomObj.roomTitle,
+		headerTitle: <RoomTitle />,
 		headerStyle: {
 			backgroundColor: '#7b9dfe'
 		},
@@ -42,16 +32,16 @@ export default class UpdateRoom extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			roomData: RoomObj,
-			roomName: RoomObj.roomTitle
+			roomData: this.props.roomData[this.props.selectedRoomId],
+			roomName: this.props.roomData[this.props.selectedRoomId]['roomTitle']
 		};
 	}
 	onSelectSwitchBoard = item => {
-		console.log('item ', item);
 		this.props.navigation.navigate('SwitchBoard');
 	};
-	onUpdateRoomName = () => {
-		console.log(this.state.roomName);
+	onUpdateRoomName = roomName => {
+		this.setState({ roomName });
+		this.props.updateRoomName(this.props.selectedRoomId, roomName);
 	};
 	render() {
 		return (
@@ -68,8 +58,8 @@ export default class UpdateRoom extends Component {
 								backgroundColor: 'gray'
 							}}
 							placeholder='Enter Room name'
-							onChangeText={roomName => this.setState({ roomName })}
-							onSubmitEditing={this.onUpdateRoomName}
+							onChangeText={this.onUpdateRoomName}
+							// onSubmitEditing={this.onUpdateRoomName}
 							value={this.state.roomName}
 						/>
 					</View>
@@ -79,25 +69,6 @@ export default class UpdateRoom extends Component {
 						renderItem={this.renderConnectors}
 						numColumns={2}
 					/>
-				</View>
-				{/* Action Button  */}
-				<View style={{ flex: 1, backgroundColor: 'red' }}>
-					{/* Rest of the app comes ABOVE the action button component !*/}
-					<ActionButton buttonColor='rgba(231,76,60,1)'>
-						<ActionButton.Item
-							buttonColor='#9b59b6'
-							title='New Task'
-							onPress={() => console.log('notes tapped!')}
-						>
-							<Icon name='md-create' style={style.actionButtonIcon} />
-						</ActionButton.Item>
-						<ActionButton.Item buttonColor='#3498db' title='Notifications' onPress={() => {}}>
-							<Icon name='md-notifications-off' style={style.actionButtonIcon} />
-						</ActionButton.Item>
-						<ActionButton.Item buttonColor='#1abc9c' title='All Tasks' onPress={() => {}}>
-							<Icon name='md-done-all' style={style.actionButtonIcon} />
-						</ActionButton.Item>
-					</ActionButton>
 				</View>
 			</View>
 		);
@@ -145,3 +116,22 @@ const style = StyleSheet.create({
 		color: 'white'
 	}
 });
+
+function mapStateToProps(state) {
+	return {
+		selectedRoomId: state.room.selectedRoomId,
+		roomData: state.room.data
+	};
+}
+const mapDispatchToProps = dispatch => {
+	return bindActionCreators(
+		{
+			updateRoomName
+		},
+		dispatch
+	);
+};
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(UpdateRoom);

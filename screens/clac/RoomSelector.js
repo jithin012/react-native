@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import { TextInput, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+import { createRooms } from '../../redux/actions';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 
-export default class RoomSelector extends Component {
+class RoomSelector extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -17,6 +20,7 @@ export default class RoomSelector extends Component {
 		this.setState({ error: '' });
 		if (room < 0 || room > 100) this.setState({ error: 'Please enter a valid Room number' });
 		else {
+			this.props.createRooms(room);
 			this.props.navigation.navigate('RoomExplore');
 		}
 	};
@@ -57,3 +61,16 @@ const style = StyleSheet.create({
 		marginTop: 16
 	}
 });
+
+const mapDispatchToProps = dispatch => {
+	return bindActionCreators(
+		{
+			createRooms
+		},
+		dispatch
+	);
+};
+export default connect(
+	null,
+	mapDispatchToProps
+)(RoomSelector);

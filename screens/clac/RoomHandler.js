@@ -51,3 +51,43 @@ const KeyGenerator = (function() {
 		getId: () => `${++id}`
 	};
 })();
+
+export const CalculateResult = items => {
+	let results = {
+		'4 button cover': 0,
+		'2 button cover': 0
+	};
+	for (let product in items) {
+		const value = parseInt(items[product]) || 0;
+		switch (product) {
+			case Products.Light:
+				if (value % 2 === 0) {
+					results['4 button cover'] += value / 2;
+					results['Two Channel'] = value / 2;
+				} else {
+					results['Two Channel'] = value / 2;
+					results['4 button cover'] += value / 2;
+					results['One Channel'] = 1;
+					results['2 button cover'] += 1;
+				}
+				break;
+			case Products.Fan:
+				if (!results['One Channel']) results['One Channel'] = value * 1;
+				else results['One Channel'] = results['One Channel'] + value * 1;
+				results['2 button cover'] += value * 1;
+
+				break;
+			case Products.Curtains:
+				results[product] = value * 1;
+				results['2 button cover'] += value * 1;
+				break;
+			case Products.Dimmer:
+				results[product] = value * 1;
+				results['2 button cover'] += value * 1;
+				break;
+		}
+	}
+	// calculation for handling 4 button cover and 2 button cover
+
+	return results;
+};

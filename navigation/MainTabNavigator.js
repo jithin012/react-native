@@ -17,6 +17,8 @@ import RoomSelector from '../screens/clac/RoomSelector';
 import RoomExplore from '../screens/clac/Roomexplore';
 import UpdateRoom from '../screens/clac/updateRoom';
 import SwitchBoard from '../screens/clac/SwitchBoard';
+import Result from '../screens/clac/Results';
+
 const HomeStack = createStackNavigator({
 	Home: Home
 });
@@ -47,6 +49,9 @@ const UpdateRoomStack = createStackNavigator({
 const SwitchBoardStack = createStackNavigator({
 	SwitchBoard: SwitchBoard
 });
+const ResultStack = createStackNavigator({
+	Result: Result
+});
 
 export default createAppContainer(
 	createSwitchNavigator(
@@ -55,7 +60,8 @@ export default createAppContainer(
 			RoomSelector: RoomSelectorStack,
 			RoomExplore: RoomExploreStack,
 			UpdateRoom: UpdateRoomStack,
-			SwitchBoard: SwitchBoardStack
+			SwitchBoard: SwitchBoardStack,
+			Result: ResultStack
 		},
 		{
 			initialRouteName: 'Home'
